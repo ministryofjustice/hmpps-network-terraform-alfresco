@@ -70,3 +70,15 @@ resource "aws_security_group" "alfresco_elasticache_in" {
     create_before_destroy = true
   }
 }
+
+# efs
+resource "aws_security_group" "alfresco_efs_in" {
+  name        = "${var.environment_name}-delius-core-efs-in"
+  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
+  description = "efs incoming"
+  tags        = "${merge(data.terraform_remote_state.vpc.tags, map("Name", "${var.environment_name}_efs_in", "Type", "File"))}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
