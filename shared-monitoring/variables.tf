@@ -2,6 +2,10 @@ variable "environment_name" {
   type = "string"
 }
 
+variable "tags" {
+  type = "map"
+}
+
 variable "region" {
   description = "The AWS region."
 }
@@ -20,11 +24,7 @@ variable "route53_domain_private" {
 
 variable "whitelist_monitoring_ips" {
   description = "List of ips allowed to access the monitoring front end"
-  type        = "list"
-}
-
-variable "bastion_remote_state_bucket_name" {
-  description = "our remote tf bucket for bastion"
+  type = "list"
 }
 
 variable "short_environment_identifier" {}
@@ -33,6 +33,10 @@ variable "project_name" {}
 
 variable "environment_type" {}
 
-variable "bastion_role_arn" {}
-
 variable "bastion_inventory" {}
+
+variable "backup_retention_days" {}
+
+variable "retention_period" {}
+
+variable "subdomain" {}
