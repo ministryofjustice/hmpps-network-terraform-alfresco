@@ -84,3 +84,6 @@ variable "private-cidr" {
 variable "db-cidr" {
   type = "map"
 }
+
+variable "snapshot_retention_days" {}
+
