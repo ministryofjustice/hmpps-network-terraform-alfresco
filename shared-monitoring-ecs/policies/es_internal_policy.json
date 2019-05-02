@@ -81,6 +81,18 @@
                 "ec2:DescribeInstances"
             ],
             "Resource": "*"
+        },
+        {
+            "Sid": "AllowUseOfKmsKey",
+            "Effect": "Allow",
+            "Action": [
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:DescribeKey"
+            ],
+            "Resource": "${elk_kms_arn}"
         }
     ]
 }

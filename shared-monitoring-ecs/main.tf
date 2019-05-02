@@ -128,6 +128,10 @@ locals {
     "${data.terraform_remote_state.vpc.vpc_private-subnet-az3}",
   ]
 
+  efs_security_groups = [
+    "${data.terraform_remote_state.security-groups.sg_alfresco_efs_in}",
+  ]
+
   tags = "${data.terraform_remote_state.vpc.tags}"
 }
 
