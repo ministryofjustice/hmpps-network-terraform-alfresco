@@ -47,7 +47,7 @@ variable "es_image_url" {
 }
 
 variable "es_service_desired_count" {
-  default = 1
+  default = 3
 }
 
 variable "es_ebs_volume_size" {

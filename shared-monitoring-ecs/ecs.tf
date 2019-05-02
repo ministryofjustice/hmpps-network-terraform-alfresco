@@ -88,10 +88,10 @@ module "create_loggroup" {
 # CREATE ECS TASK DEFINTIONS
 ############################################
 
-# data "aws_ecs_task_definition" "app_task_definition" {
-#   task_definition = "${aws_ecs_task_definition.environment.family}"
-#   depends_on      = ["aws_ecs_task_definition.environment"]
-# }
+data "aws_ecs_task_definition" "app_task_definition" {
+  task_definition = "${aws_ecs_task_definition.environment.family}"
+  depends_on      = ["aws_ecs_task_definition.environment"]
+}
 
 data "template_file" "app_task_definition" {
   template = "${file("./task_definitions/elasticsearch.conf")}"
@@ -132,21 +132,19 @@ resource "aws_ecs_task_definition" "environment" {
 # CREATE ECS SERVICES
 ############################################
 
-
-# module "app_service" {
-#   source                          = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//ecs/ecs_service//withloadbalancer//elb"
-#   servicename                     = "${local.common_name}"
-#   clustername                     = "${module.ecs_cluster.ecs_cluster_id}"
-#   ecs_service_role                = "${module.create-iam-ecs-role-int.iamrole_arn}"
-#   task_definition_family          = "${aws_ecs_task_definition.environment.family}"
-#   task_definition_revision        = "${aws_ecs_task_definition.environment.revision}"
-#   current_task_definition_version = "${data.aws_ecs_task_definition.app_task_definition.revision}"
-#   service_desired_count           = "${local.service_desired_count}"
-#   elb_name                        = "${module.create_app_elb.environment_elb_name}"
-#   containername                   = "${local.application}"
-#   containerport                   = "${local.containerport}"
-# }
-
+module "app_service" {
+  source                          = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//ecs/ecs_service//withloadbalancer//elb"
+  servicename                     = "${local.common_name}"
+  clustername                     = "${module.ecs_cluster.ecs_cluster_id}"
+  ecs_service_role                = "${module.create-iam-ecs-role-int.iamrole_arn}"
+  task_definition_family          = "${aws_ecs_task_definition.environment.family}"
+  task_definition_revision        = "${aws_ecs_task_definition.environment.revision}"
+  current_task_definition_version = "${data.aws_ecs_task_definition.app_task_definition.revision}"
+  service_desired_count           = "${local.service_desired_count}"
+  elb_name                        = "${module.create_app_elb.environment_elb_name}"
+  containername                   = "${local.application}"
+  containerport                   = "${local.containerport}"
+}
 
 # #-------------------------------------------------------------
 # ### Create ecs  
