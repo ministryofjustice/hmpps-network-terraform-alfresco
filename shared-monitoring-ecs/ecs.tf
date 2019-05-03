@@ -1,10 +1,3 @@
-locals {
-  efs_mount_path = "/opt/es_backup"
-
-  # efs_dns_name   = "${data.terraform_remote_state.efs.efs_dns_name}"
-  es_home_dir = "/usr/share/elasticsearch"
-}
-
 ############################################
 # CREATE LB FOR INGRESS NODE
 ############################################
@@ -34,7 +27,7 @@ module "create_app_elb" {
 
   health_check = [
     {
-      target              = "HTTP:9200/"
+      target              = "HTTP:9200/_cat/health"
       interval            = 30
       healthy_threshold   = 2
       unhealthy_threshold = 2
@@ -97,19 +90,16 @@ data "template_file" "app_task_definition" {
   template = "${file("./task_definitions/elasticsearch.conf")}"
 
   vars {
-    environment       = "${local.environment}"
-    image_url         = "${local.image_url}"
-    container_name    = "${local.application}"
-    log_group_name    = "${module.create_loggroup.loggroup_name}"
-    log_group_region  = "${local.region}"
-    memory            = "${var.es_ecs_memory}"
-    cpu_units         = "${var.es_ecs_cpu_units}"
-    es_jvm_heap_size  = "${var.es_jvm_heap_size}"
-    mem_limit         = "${var.es_ecs_mem_limit}"
-    efs_mount_path    = "${local.efs_mount_path}"
-    es_cluster_name   = "${local.common_name}"
-    es_discovery_type = "${var.es_discovery_type}"
-    es_node_name      = "${var.es_node_name}"
+    environment      = "${local.environment}"
+    image_url        = "${local.image_url}"
+    container_name   = "${local.application}"
+    log_group_name   = "${module.create_loggroup.loggroup_name}"
+    log_group_region = "${local.region}"
+    memory           = "${var.es_ecs_memory}"
+    cpu_units        = "${var.es_ecs_cpu_units}"
+    es_jvm_heap_size = "${var.es_jvm_heap_size}"
+    mem_limit        = "${var.es_ecs_mem_limit}"
+    efs_mount_path   = "${local.efs_mount_path}"
   }
 }
 
@@ -125,6 +115,11 @@ resource "aws_ecs_task_definition" "environment" {
   volume {
     name      = "data"
     host_path = "${local.es_home_dir}/data"
+  }
+
+  volume {
+    name      = "confd"
+    host_path = "${local.es_home_dir}/conf.d/elasticsearch.yml.tmpl"
   }
 }
 
@@ -146,73 +141,97 @@ module "app_service" {
   containerport                   = "${local.containerport}"
 }
 
-# #-------------------------------------------------------------
-# ### Create ecs  
-# #-------------------------------------------------------------
+#-------------------------------------------------------------
+### Create ecs  
+#-------------------------------------------------------------
 
+data "template_file" "userdata_ecs" {
+  template = "${file("./userdata/elasticsearch.sh")}"
 
-# data "template_file" "userdata_ecs" {
-#   template = "${file("../user_data/ecs.sh")}"
+  vars {
+    app_name             = "${local.application}"
+    bastion_inventory    = "${local.bastion_inventory}"
+    env_identifier       = "${local.environment_identifier}"
+    short_env_identifier = "${local.short_environment_identifier}"
+    environment_name     = "${var.environment_name}"
+    private_domain       = "${local.internal_domain}"
+    account_id           = "${local.account_id}"
+    internal_domain      = "${local.internal_domain}"
+    environment          = "${local.environment}"
+    common_name          = "${local.common_name}"
+    es_cluster_name      = "${local.common_name}"
+    ecs_cluster          = "${module.ecs_cluster.ecs_cluster_name}"
+    efs_dns_name         = "${module.efs_backups.dns_cname}"
+    efs_mount_path       = "${local.efs_mount_path}"
+    es_home_dir          = "${local.es_home_dir}"
+    es_master_nodes      = "${var.es_master_nodes}"
+  }
+}
 
+############################################
+# CREATE LAUNCH CONFIG FOR EC2 RUNNING SERVICES
+############################################
 
-#   vars {
-#     app_name             = "${local.application}"
-#     bastion_inventory    = "${local.bastion_inventory}"
-#     env_identifier       = "${local.environment_identifier}"
-#     short_env_identifier = "${local.short_environment_identifier}"
-#     environment_name     = "${var.environment_name}"
-#     private_domain       = "${local.internal_domain}"
-#     account_id           = "${local.account_id}"
-#     internal_domain      = "${local.internal_domain}"
-#     environment          = "${local.environment}"
-#     common_name          = "${local.common_name}"
-#     ecs_cluster          = "${module.ecs_cluster.ecs_cluster_name}"
-#     efs_dns_name         = "${local.efs_dns_name}"
-#     efs_mount_path       = "${local.efs_mount_path}"
-#     es_home_dir          = "${local.es_home_dir}"
-#     es_discovery_type    = "${var.es_discovery_type}"
-#   }
-# }
-
+module "launch_cfg" {
+  source                      = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//launch_configuration//blockdevice"
+  launch_configuration_name   = "${local.common_name}"
+  image_id                    = "${data.aws_ami.ecs_ami.id}"
+  instance_type               = "${var.es_instance_type}"
+  volume_size                 = "30"
+  instance_profile            = "${module.create-iam-instance-profile-es.iam_instance_name}"
+  key_name                    = "${local.ssh_deployer_key}"
+  ebs_device_name             = "/dev/xvdb"
+  ebs_encrypted               = "true"
+  ebs_volume_size             = "${var.es_ebs_volume_size}"
+  ebs_volume_type             = "standard"
+  associate_public_ip_address = false
+  security_groups             = ["${local.instance_security_groups}"]
+  user_data                   = "${data.template_file.userdata_ecs.rendered}"
+}
 
 # ############################################
-# # CREATE LAUNCH CONFIG FOR EC2 RUNNING SERVICES
+# # CREATE AUTO SCALING GROUP
 # ############################################
 
+locals {
+  ecs_tags = "${merge(data.terraform_remote_state.vpc.tags, map("es_cluster_discovery", "${local.common_name}"))}"
+}
 
-# module "launch_cfg" {
-#   source                      = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//launch_configuration//blockdevice"
-#   launch_configuration_name   = "${local.common_name}-az1"
-#   image_id                    = "${data.aws_ami.ecs_ami.id}"
-#   instance_type               = "${var.es_instance_type}"
-#   volume_size                 = "30"
-#   instance_profile            = "${local.instance_profile}"
-#   key_name                    = "${local.ssh_deployer_key}"
-#   ebs_device_name             = "/dev/xvdb"
-#   ebs_encrypted               = "true"
-#   ebs_volume_size             = "${var.es_ebs_volume_size}"
-#   ebs_volume_type             = "standard"
-#   associate_public_ip_address = false
-#   security_groups             = ["${local.instance_security_groups}"]
-#   user_data                   = "${data.template_file.userdata_ecs.rendered}"
-# }
+#AZ1
+module "auto_scale_az1" {
+  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=issue-160-add-tags-to-asg//modules//autoscaling//group//asg_classic_lb"
+  asg_name             = "${local.common_name}-az1"
+  subnet_ids           = ["${local.private_subnet_ids[0]}"]
+  asg_min              = 1
+  asg_max              = 1
+  asg_desired          = 1
+  launch_configuration = "${module.launch_cfg.launch_name}"
+  load_balancers       = ["${module.create_app_elb.environment_elb_name}"]
+  tags                 = "${local.ecs_tags}"
+}
 
+#AZ2
+module "auto_scale_az2" {
+  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=issue-160-add-tags-to-asg//modules//autoscaling//group//asg_classic_lb"
+  asg_name             = "${local.common_name}-az2"
+  subnet_ids           = ["${local.private_subnet_ids[1]}"]
+  asg_min              = 1
+  asg_max              = 1
+  asg_desired          = 1
+  launch_configuration = "${module.launch_cfg.launch_name}"
+  load_balancers       = ["${module.create_app_elb.environment_elb_name}"]
+  tags                 = "${local.ecs_tags}"
+}
 
-# # ############################################
-# # # CREATE AUTO SCALING GROUP
-# # ############################################
-
-
-# #AZ1
-# module "auto_scale_az1" {
-#   source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=pre-shared-vpc//modules//autoscaling//group//asg_classic_lb"
-#   asg_name             = "${local.common_name}-az1"
-#   subnet_ids           = ["${local.private_subnet_ids[0]}"]
-#   asg_min              = 1
-#   asg_max              = 1
-#   asg_desired          = 1
-#   launch_configuration = "${module.launch_cfg.launch_name}"
-#   load_balancers       = []
-#   tags                 = "${local.tags}"
-# }
-
+#AZ3
+module "auto_scale_az3" {
+  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=issue-160-add-tags-to-asg//modules//autoscaling//group//asg_classic_lb"
+  asg_name             = "${local.common_name}-az3"
+  subnet_ids           = ["${local.private_subnet_ids[2]}"]
+  asg_min              = 1
+  asg_max              = 1
+  asg_desired          = 1
+  launch_configuration = "${module.launch_cfg.launch_name}"
+  load_balancers       = ["${module.create_app_elb.environment_elb_name}"]
+  tags                 = "${local.ecs_tags}"
+}

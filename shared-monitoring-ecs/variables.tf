@@ -26,10 +26,6 @@ variable "environment_name" {}
 
 # Elasticsearch
 
-variable "es_discovery_type" {
-  default = "single-node"
-}
-
 variable "es_ecs_memory" {
   default = "12000"
 }
@@ -97,8 +93,8 @@ variable "es_jvm_heap_size" {
   default = "1g"
 }
 
-variable "es_node_name" {
-  default = "es1"
+variable "es_master_nodes" {
+  default = "2"
 }
 
 # SG

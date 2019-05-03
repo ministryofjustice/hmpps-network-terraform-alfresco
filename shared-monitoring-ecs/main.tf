@@ -102,6 +102,8 @@ data "aws_acm_certificate" "cert" {
 locals {
   ami_id                       = "${data.aws_ami.ecs_ami.id}"
   application                  = "elasticsearch"
+  efs_mount_path               = "/opt/es_backup"
+  es_home_dir                  = "/usr/share/elasticsearch"
   cidr_block                   = "${data.terraform_remote_state.vpc.vpc_cidr_block}"
   vpc_id                       = "${data.terraform_remote_state.vpc.vpc_id}"
   account_id                   = "${data.terraform_remote_state.vpc.vpc_account_id}"
@@ -121,6 +123,8 @@ locals {
   containerport                = 9200
   service_desired_count        = "${var.es_service_desired_count}"
   region                       = "${var.region}"
+  bastion_inventory            = "${var.bastion_inventory}"
+  ssh_deployer_key             = "${data.terraform_remote_state.vpc.ssh_deployer_key}"
 
   private_subnet_ids = [
     "${data.terraform_remote_state.vpc.vpc_private-subnet-az1}",
@@ -130,6 +134,12 @@ locals {
 
   efs_security_groups = [
     "${data.terraform_remote_state.security-groups.sg_alfresco_efs_in}",
+  ]
+
+  instance_security_groups = [
+    "${data.terraform_remote_state.security-groups.sg_ssh_bastion_in_id}",
+    "${data.terraform_remote_state.security-groups.sg_alfresco_efs_in}",
+    "${data.terraform_remote_state.security-groups.sg_monitoring}",
   ]
 
   tags = "${data.terraform_remote_state.vpc.tags}"
@@ -150,20 +160,11 @@ locals {
 #   s3bucket_kms_id              = "${data.terraform_remote_state.s3bucket.s3bucket_kms_id}"
 #   s3bucket                     = "${data.terraform_remote_state.s3bucket.s3bucket}"
 #   app_hostnames                = "${data.terraform_remote_state.vpc.app_hostnames}"
-#   bastion_inventory            = "${var.bastion_inventory}"
 #   application                  = "elasticsearch"
 #   image_version                = "latest"
 #   config-bucket                = "${data.terraform_remote_state.vpc.common_s3-config-bucket}"
 #   public_subnet_ids            = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
 #   ecs_service_role             = "${data.terraform_remote_state.iam.iam_service_ecs_es_role_arn}"
 #   ecs_instance_role            = "${data.terraform_remote_state.iam.iam_instance_ecs_es_role_arn}"
-
-
-#   instance_security_groups = [
-#     bastion_in_sg_id    = "${data.terraform_remote_state.security-groups.sg_ssh_bastion_in_id} 
-#     "${data.terraform_remote_state.security-groups.security_groups_sg_efs_sg_id}",
-#     "${data.terraform_remote_state.vpc.common_sg_outbound_id}",
-#     "${data.terraform_remote_state.vpc.monitoring_server_client_sg_id}",
-#   ]
 # }
 
