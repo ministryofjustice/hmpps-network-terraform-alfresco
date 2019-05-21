@@ -5,6 +5,7 @@
 locals {
   sg_monitoring_elb  = "${data.terraform_remote_state.security-groups.sg_monitoring_elb}"
   sg_monitoring_inst = "${data.terraform_remote_state.security-groups.sg_monitoring}"
+  sg_elasticsearch   = "${data.terraform_remote_state.security-groups.sg_elasticsearch}"
 }
 
 # lb
@@ -24,7 +25,7 @@ resource "aws_security_group_rule" "sg_monitoring_http_lb_out" {
   from_port                = "9200"
   to_port                  = "9200"
   protocol                 = "tcp"
-  source_security_group_id = "${local.sg_monitoring_inst}"
+  source_security_group_id = "${local.sg_elasticsearch}"
   description              = "${var.environment_identifier}-es-http"
 }
 
@@ -33,7 +34,7 @@ resource "aws_security_group_rule" "sg_monitoring_http_from_lb_in" {
   from_port                = "9200"
   to_port                  = "9200"
   protocol                 = "tcp"
-  source_security_group_id = "${local.sg_monitoring_inst}"
+  source_security_group_id = "${local.sg_elasticsearch}"
   type                     = "ingress"
   security_group_id        = "${local.sg_monitoring_elb}"
   description              = "${var.environment_identifier}-elasticsearch-http"
@@ -179,4 +180,22 @@ resource "aws_security_group_rule" "monitoring_sg_es_https" {
   type              = "egress"
   cidr_blocks       = ["0.0.0.0/0"]
   count             = "${var.sg_create_outbound_web_rules}"
+}
+
+resource "aws_security_group_rule" "elasticsearch_self_in" {
+  from_port         = 0
+  protocol          = -1
+  security_group_id = "${local.sg_elasticsearch}"
+  to_port           = 0
+  type              = "ingress"
+  self              = true
+}
+
+resource "aws_security_group_rule" "elasticsearch_self_out" {
+  from_port         = 0
+  protocol          = -1
+  security_group_id = "${local.sg_elasticsearch}"
+  to_port           = 0
+  type              = "egress"
+  self              = true
 }

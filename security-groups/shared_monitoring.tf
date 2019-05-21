@@ -21,6 +21,14 @@ resource "aws_security_group" "monitoring_client_sg" {
   tags = "${merge(data.terraform_remote_state.vpc.tags, map("Name", "${var.environment_identifier}-monitoring-elk-client"))}"
 }
 
+resource "aws_security_group" "elasticsearch_sg" {
+  name        = "${var.environment_identifier}-monitoring-elasticsearch"
+  description = "security group for ${var.environment_identifier}-elasticsearch"
+  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
+
+  tags = "${merge(data.terraform_remote_state.vpc.tags, map("Name", "${var.environment_identifier}-monitoring-elasticsearch"))}"
+}
+
 # outputs
 output "sg_monitoring" {
   value = "${aws_security_group.monitoring_sg.id}"
@@ -32,4 +40,8 @@ output "sg_monitoring_elb" {
 
 output "sg_monitoring_client" {
   value = "${aws_security_group.monitoring_client_sg.id}"
+}
+
+output "sg_elasticsearch" {
+  value = "${aws_security_group.elasticsearch_sg.id}"
 }
