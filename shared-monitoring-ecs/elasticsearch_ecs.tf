@@ -185,7 +185,7 @@ module "launch_cfg" {
   ebs_volume_size             = "${var.es_ebs_volume_size}"
   ebs_volume_type             = "standard"
   associate_public_ip_address = false
-  security_groups             = ["${local.instance_security_groups}"]
+  security_groups             = ["${local.elasticsearch_security_groups}"]
   user_data                   = "${data.template_file.userdata_ecs.rendered}"
 }
 

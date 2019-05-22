@@ -91,6 +91,9 @@ network.host: 0.0.0.0
 path.data: /usr/share/elasticsearch/data
 path.repo: /opt/es_backup
 # Node settings
+node.master: false 
+node.data: false 
+node.ingest: true 
 discovery.zen.minimum_master_nodes: ${es_master_nodes}
 node.name: $HOSTNAME
 network.publish_host: _ec2:privateIp_
@@ -107,13 +110,16 @@ chown -R elasticsearch:elasticsearch ${es_home_dir} ${efs_mount_path}
 
 chmod -R 770 ${es_home_dir} ${efs_mount_path}
 
-echo "vm.max_map_count=262144" > /etc/sysctl.d/elasticsearch.conf
+echo "vm.max_map_count=262144
+vm.overcommit_memory=1" > /etc/sysctl.d/elasticsearch.conf
 
 sysctl -p
 
 ulimit -n 65536
 ulimit -u 2048
 ulimit -l unlimited
+
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
 
 service docker restart
 

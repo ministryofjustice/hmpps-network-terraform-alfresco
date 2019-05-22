@@ -29,15 +29,77 @@ resource "aws_security_group_rule" "sg_monitoring_http_lb_out" {
   description              = "${var.environment_identifier}-es-http"
 }
 
-# instance
+resource "aws_security_group_rule" "sg_monitoring_http_lb_out_inst" {
+  security_group_id        = "${local.sg_monitoring_elb}"
+  type                     = "egress"
+  from_port                = "9200"
+  to_port                  = "9200"
+  protocol                 = "tcp"
+  source_security_group_id = "${local.sg_monitoring_inst}"
+  description              = "${var.environment_identifier}-es-http"
+}
+
+# es instance
 resource "aws_security_group_rule" "sg_monitoring_http_from_lb_in" {
   from_port                = "9200"
   to_port                  = "9200"
   protocol                 = "tcp"
-  source_security_group_id = "${local.sg_elasticsearch}"
+  source_security_group_id = "${local.sg_monitoring_elb}"
   type                     = "ingress"
-  security_group_id        = "${local.sg_monitoring_elb}"
+  security_group_id        = "${local.sg_elasticsearch}"
   description              = "${var.environment_identifier}-elasticsearch-http"
+}
+
+resource "aws_security_group_rule" "sg_monitoring_inst_in" {
+  from_port                = "9200"
+  to_port                  = "9200"
+  protocol                 = "tcp"
+  source_security_group_id = "${local.sg_monitoring_inst}"
+  type                     = "ingress"
+  security_group_id        = "${local.sg_elasticsearch}"
+  description              = "${var.environment_identifier}-elasticsearch-http"
+}
+
+resource "aws_security_group_rule" "sg_monitoring_inst_alt_in" {
+  from_port                = "9300"
+  to_port                  = "9300"
+  protocol                 = "tcp"
+  source_security_group_id = "${local.sg_monitoring_inst}"
+  type                     = "ingress"
+  security_group_id        = "${local.sg_elasticsearch}"
+  description              = "${var.environment_identifier}-elasticsearch-http"
+}
+
+resource "aws_security_group_rule" "elasticsearch_http" {
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  security_group_id = "${local.sg_elasticsearch}"
+  type              = "egress"
+  cidr_blocks       = ["0.0.0.0/0"]
+  count             = "${var.sg_create_outbound_web_rules}"
+}
+
+resource "aws_security_group_rule" "elasticsearch_https" {
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  security_group_id = "${local.sg_elasticsearch}"
+  type              = "egress"
+  cidr_blocks       = ["0.0.0.0/0"]
+  count             = "${var.sg_create_outbound_web_rules}"
+}
+
+# monitoring
+
+resource "aws_security_group_rule" "sg_monitoring_http_lb_in_inst" {
+  security_group_id        = "${local.sg_monitoring_inst}"
+  type                     = "ingress"
+  from_port                = "9200"
+  to_port                  = "9200"
+  protocol                 = "tcp"
+  source_security_group_id = "${local.sg_monitoring_elb}"
+  description              = "${var.environment_identifier}-es-http"
 }
 
 resource "aws_security_group_rule" "monitoring_rsyslog_tcp_in" {
@@ -110,25 +172,25 @@ resource "aws_security_group_rule" "monitoring_kibana_tcp_in" {
   security_group_id = "${local.sg_monitoring_inst}"
 }
 
-resource "aws_security_group_rule" "sg_monitoring_http_in" {
-  from_port         = "9200"
-  to_port           = "9200"
-  protocol          = "tcp"
-  cidr_blocks       = ["${local.cidr_block}"]
-  type              = "ingress"
-  security_group_id = "${local.sg_monitoring_inst}"
-  description       = "${var.environment_identifier}-elasticsearch-http"
-}
+# resource "aws_security_group_rule" "sg_monitoring_http_in" {
+#   from_port         = "9200"
+#   to_port           = "9200"
+#   protocol          = "tcp"
+#   cidr_blocks       = ["${local.cidr_block}"]
+#   type              = "ingress"
+#   security_group_id = "${local.sg_monitoring_inst}"
+#   description       = "${var.environment_identifier}-elasticsearch-http"
+# }
 
-resource "aws_security_group_rule" "sg_monitoring_https_in" {
-  from_port         = "9300"
-  to_port           = "9300"
-  protocol          = "tcp"
-  cidr_blocks       = ["${local.cidr_block}"]
-  type              = "ingress"
-  security_group_id = "${local.sg_monitoring_inst}"
-  description       = "${var.environment_identifier}-elasticsearch-https"
-}
+# resource "aws_security_group_rule" "sg_monitoring_https_in" {
+#   from_port         = "9300"
+#   to_port           = "9300"
+#   protocol          = "tcp"
+#   cidr_blocks       = ["${local.cidr_block}"]
+#   type              = "ingress"
+#   security_group_id = "${local.sg_monitoring_inst}"
+#   description       = "${var.environment_identifier}-elasticsearch-https"
+# }
 
 resource "aws_security_group_rule" "sg_monitoring_logstash_in" {
   from_port = "9600"

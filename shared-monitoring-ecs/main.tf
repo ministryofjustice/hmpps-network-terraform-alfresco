@@ -142,6 +142,12 @@ locals {
     "${data.terraform_remote_state.security-groups.sg_monitoring}",
   ]
 
+  elasticsearch_security_groups = [
+    "${data.terraform_remote_state.security-groups.sg_ssh_bastion_in_id}",
+    "${data.terraform_remote_state.security-groups.sg_alfresco_efs_in}",
+    "${data.terraform_remote_state.security-groups.sg_elasticsearch}",
+  ]
+
   tags = "${data.terraform_remote_state.vpc.tags}"
 }
 
