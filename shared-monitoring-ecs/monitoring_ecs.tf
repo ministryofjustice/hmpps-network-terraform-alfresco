@@ -1,4 +1,69 @@
 ############################################
+# CREATE LB FOR INGRESS NODE
+############################################
+
+# elb
+
+resource "aws_elb" "mon_lb" {
+  name            = "${local.common_name}-mon"
+  subnets         = ["${local.private_subnet_ids}"]
+  security_groups = ["${local.lb_security_groups}"]
+  internal        = true
+
+  cross_zone_load_balancing   = "${var.cross_zone_load_balancing}"
+  idle_timeout                = "${var.idle_timeout}"
+  connection_draining         = "${var.connection_draining}"
+  connection_draining_timeout = "${var.connection_draining_timeout}"
+
+  listener {
+    instance_port     = 9200
+    instance_protocol = "http"
+    lb_port           = 9200
+    lb_protocol       = "http"
+  }
+
+  listener {
+    instance_port     = 2514
+    instance_protocol = "tcp"
+    lb_port           = 2514
+    lb_protocol       = "tcp"
+  }
+
+  listener {
+    instance_port     = 5601
+    instance_protocol = "http"
+    lb_port           = 5601
+    lb_protocol       = "http"
+  }
+
+  listener {
+    instance_port      = 5601
+    instance_protocol  = "http"
+    lb_port            = 443
+    lb_protocol        = "https"
+    ssl_certificate_id = "${local.certificate_arn}"
+  }
+
+  access_logs = {
+    bucket        = "${module.s3_lb_logs_bucket.s3_bucket_name}"
+    bucket_prefix = "${local.common_name}-mon"
+    interval      = 60
+  }
+
+  health_check = [
+    {
+      target              = "HTTP:9200/_cat/health"
+      interval            = 30
+      healthy_threshold   = 2
+      unhealthy_threshold = 2
+      timeout             = 5
+    },
+  ]
+
+  tags = "${merge(local.tags, map("Name", format("%s", "${local.common_name}-mon")))}"
+}
+
+############################################
 # CREATE LOG GROUPS FOR CONTAINER LOGS
 ############################################
 
@@ -103,7 +168,7 @@ module "mon_service" {
   task_definition_revision        = "${aws_ecs_task_definition.mon_task_definition.revision}"
   current_task_definition_version = "${data.aws_ecs_task_definition.mon_task_definition.revision}"
   service_desired_count           = "1"
-  elb_name                        = "${module.create_app_elb.environment_elb_name}"
+  elb_name                        = "${aws_elb.mon_lb.name}"
   containername                   = "${local.application}"
   containerport                   = "${local.containerport}"
 }
@@ -169,6 +234,6 @@ module "mon_az1" {
   asg_max              = 1
   asg_desired          = 1
   launch_configuration = "${module.mon_launch_cfg.launch_name}"
-  load_balancers       = ["${module.create_app_elb.environment_elb_name}"]
+  load_balancers       = ["${aws_elb.mon_lb.name}"]
   tags                 = "${local.ecs_tags}"
 }
