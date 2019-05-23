@@ -237,3 +237,30 @@ module "mon_az1" {
   load_balancers       = ["${aws_elb.mon_lb.name}"]
   tags                 = "${local.ecs_tags}"
 }
+
+# ############################################
+# ROUTE53
+# ############################################
+resource "aws_route53_record" "internal_monitoring_dns" {
+  name    = "${local.server_dns}.${local.internal_domain}"
+  type    = "A"
+  zone_id = "${local.private_zone_id}"
+
+  alias {
+    evaluate_target_health = false
+    name                   = "${aws_elb.mon_lb.dns_name}"
+    zone_id                = "${aws_elb.mon_lb.zone_id}"
+  }
+}
+
+resource "aws_route53_record" "external_monitoring_dns" {
+  zone_id = "${local.public_zone_id}"
+  name    = "${local.server_dns}.${local.external_domain}"
+  type    = "A"
+
+  alias {
+    evaluate_target_health = false
+    name                   = "${aws_elb.mon_lb.dns_name}"
+    zone_id                = "${aws_elb.mon_lb.zone_id}"
+  }
+}

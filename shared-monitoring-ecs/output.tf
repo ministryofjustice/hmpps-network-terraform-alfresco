@@ -1,59 +1,66 @@
-# # ECS
-# output "ecs_cluster_arn" {
-#   value = "${module.ecs_cluster.ecs_cluster_arn}"
-# }
-# output "ecs_cluster_id" {
-#   value = "${module.ecs_cluster.ecs_cluster_id}"
-# }
-# output "ecs_cluster_name" {
-#   value = "${module.ecs_cluster.ecs_cluster_name}"
-# }
-# # LOG GROUPS
-# output "loggroup_arn" {
-#   value = "${module.create_loggroup.loggroup_arn}"
-# }
-# output "loggroup_name" {
-#   value = "${module.create_loggroup.loggroup_name}"
-# }
-# # Task definition
-# output "task_definition_arn" {
-#   value = "${aws_ecs_task_definition.environment.arn}"
-# }
-# output "task_definition_family" {
-#   value = "${aws_ecs_task_definition.environment.family}"
-# }
-# output "task_definition_revision" {
-#   value = "${aws_ecs_task_definition.environment.revision}"
-# }
-# # ECS Service
-# output "ecs_service_id" {
-#   value = "${module.app_service.ecs_service_id}"
-# }
-# output "ecs_service_name" {
-#   value = "${module.app_service.ecs_service_name}"
-# }
-# # LB
-# output "es_elb_id" {
-#   description = "The name of the ELB"
-#   value       = "${module.create_app_elb.environment_elb_id}"
-# }
-# output "es_elb_name" {
-#   description = "The name of the ELB"
-#   value       = "${module.create_app_elb.environment_elb_name}"
-# }
-# output "es_elb_dns_name" {
-#   description = "The DNS name of the ELB"
-#   value       = "${module.create_app_elb.environment_elb_dns_name}"
-# }
-# output "es_elb_source_security_group_id" {
-#   description = "The ID of the security group that you can use as part of your inbound rules for your load balancer's back-end application instances"
-#   value       = "${module.create_app_elb.environment_elb_source_security_group_id}"
-# }
-# output "es_elb_zone_id" {
-#   description = "The canonical hosted zone ID of the ELB (to be used in a Route 53 Alias record)"
-#   value       = "${module.create_app_elb.environment_elb_zone_id}"
-# }
-# output "es_elb_dns_cname" {
-#   value = "${aws_route53_record.dns_entry.fqdn}"
-# }
+# ECS
+output "ecs_cluster_arn" {
+  value = "${module.ecs_cluster.ecs_cluster_arn}"
+}
 
+output "ecs_cluster_id" {
+  value = "${module.ecs_cluster.ecs_cluster_id}"
+}
+
+output "ecs_cluster_name" {
+  value = "${module.ecs_cluster.ecs_cluster_name}"
+}
+
+output "loggroup_name" {
+  value = {
+    elasticsearch = "${module.create_loggroup.loggroup_name}"
+    monitoring    = "${module.mon_loggroup.loggroup_name}"
+    kibana        = "${module.kibana_loggroup.loggroup_name}"
+    logstash      = "${module.logstash_loggroup.loggroup_name}"
+    redis         = "${module.redis_loggroup.loggroup_name}"
+  }
+}
+
+# ECS Service
+output "ecs_service_id" {
+  value = "${module.app_service.ecs_service_id}"
+}
+
+output "ecs_service_name" {
+  value = "${module.app_service.ecs_service_name}"
+}
+
+output "monitoring_server_internal_url" {
+  value = "${aws_route53_record.internal_monitoring_dns.fqdn}"
+}
+
+output "monitoring_server_external_url" {
+  value = "${aws_route53_record.external_monitoring_dns.fqdn}"
+}
+
+output "monitoring_server_client_sg_id" {
+  value = "${local.sg_monitoring_client}"
+}
+
+# EFS
+output "monitoring_server_efs_share_arn" {
+  value = "${module.efs_backups.efs_arn}"
+}
+
+output "monitoring_server_efs_share_id" {
+  value = "${module.efs_backups.efs_id}"
+}
+
+output "monitoring_server_efs_share_dns" {
+  value = "${module.efs_backups.efs_dns_name}"
+}
+
+# s3buckets
+
+output "monitoring_server_bucket_name" {
+  value = "${module.s3_backups_bucket.s3_bucket_name}"
+}
+
+output "monitoring_server_bucket_arn" {
+  value = "${module.s3_backups_bucket.s3_bucket_arn}"
+}

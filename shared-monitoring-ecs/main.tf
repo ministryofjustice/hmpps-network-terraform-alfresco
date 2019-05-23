@@ -125,6 +125,7 @@ locals {
   region                       = "${var.region}"
   bastion_inventory            = "${var.bastion_inventory}"
   ssh_deployer_key             = "${data.terraform_remote_state.vpc.ssh_deployer_key}"
+  server_dns                   = "monitoring-ecs"
 
   private_subnet_ids = [
     "${data.terraform_remote_state.vpc.vpc_private-subnet-az1}",
