@@ -227,7 +227,7 @@ module "mon_launch_cfg" {
 
 #AZ1
 module "mon_az1" {
-  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=issue-160-add-tags-to-asg//modules//autoscaling//group//asg_classic_lb"
+  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//asg_classic_lb"
   asg_name             = "${local.common_name}-mon-az1"
   subnet_ids           = ["${local.private_subnet_ids[0]}"]
   asg_min              = 1

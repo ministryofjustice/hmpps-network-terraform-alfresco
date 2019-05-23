@@ -199,7 +199,7 @@ locals {
 
 #AZ1
 module "auto_scale_az1" {
-  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=issue-160-add-tags-to-asg//modules//autoscaling//group//asg_classic_lb"
+  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//asg_classic_lb"
   asg_name             = "${local.common_name}-az1"
   subnet_ids           = ["${local.private_subnet_ids[0]}"]
   asg_min              = 1
@@ -212,7 +212,7 @@ module "auto_scale_az1" {
 
 #AZ2
 module "auto_scale_az2" {
-  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=issue-160-add-tags-to-asg//modules//autoscaling//group//asg_classic_lb"
+  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//asg_classic_lb"
   asg_name             = "${local.common_name}-az2"
   subnet_ids           = ["${local.private_subnet_ids[1]}"]
   asg_min              = 1
@@ -225,7 +225,7 @@ module "auto_scale_az2" {
 
 #AZ3
 module "auto_scale_az3" {
-  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=issue-160-add-tags-to-asg//modules//autoscaling//group//asg_classic_lb"
+  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//asg_classic_lb"
   asg_name             = "${local.common_name}-az3"
   subnet_ids           = ["${local.private_subnet_ids[2]}"]
   asg_min              = 1
