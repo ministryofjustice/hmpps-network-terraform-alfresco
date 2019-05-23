@@ -148,6 +148,8 @@ locals {
     "${data.terraform_remote_state.security-groups.sg_elasticsearch}",
   ]
 
+  sg_monitoring_client = "${data.terraform_remote_state.security-groups.sg_monitoring_client}"
+
   tags = "${data.terraform_remote_state.vpc.tags}"
 }
 
