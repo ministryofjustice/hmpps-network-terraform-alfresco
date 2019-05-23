@@ -3,7 +3,7 @@
 #--------------------------------------------
 module "s3_lb_logs_bucket" {
   source         = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=pre-shared-vpc//modules//s3bucket//s3bucket_without_policy"
-  s3_bucket_name = "${local.common_name}-lb-logs"
+  s3_bucket_name = "${local.common_name}-mon-lb-logs"
   tags           = "${local.tags}"
 }
 
