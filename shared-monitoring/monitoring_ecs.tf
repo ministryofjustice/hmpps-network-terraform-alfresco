@@ -153,6 +153,11 @@ resource "aws_ecs_task_definition" "mon_task_definition" {
     name      = "data"
     host_path = "${local.es_home_dir}/data"
   }
+
+  volume {
+    name      = "curator"
+    host_path = "/opt/curator"
+  }
 }
 
 ############################################
@@ -193,10 +198,11 @@ data "template_file" "userdata_mon" {
     common_name          = "${local.common_name}"
     es_cluster_name      = "${local.common_name}"
     ecs_cluster          = "${module.ecs_cluster.ecs_cluster_name}"
-    efs_dns_name         = "${module.efs_backups.dns_cname}"
+    efs_dns_name         = "${module.efs_backups.efs_dns_name}"
     efs_mount_path       = "${local.efs_mount_path}"
     es_home_dir          = "${local.es_home_dir}"
     es_master_nodes      = "${var.es_master_nodes}"
+    es_backup_bucket     = "${module.s3_backups_bucket.s3_bucket_name}"
   }
 }
 

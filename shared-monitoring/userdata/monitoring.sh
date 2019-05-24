@@ -47,6 +47,14 @@ cat << EOF > ~/bootstrap.yml
      - bootstrap
      - rsyslog
      - users
+   - name: Add a cron to run s3_sync periodically
+  tasks:
+    - name: Add a cron to run s3_sync periodically
+      cron:
+        name: "Sync backups to s3"
+        job: "aws s3 sync ${efs_mount_path}/. s3://${es_backup_bucket}"
+        hour: 0
+        minute: 30
 EOF
 
 ansible-galaxy install -f -r ~/requirements.yml
@@ -81,7 +89,7 @@ groupadd -g 3999 elasticsearch
 
 useradd -m -g elasticsearch -u 3999 elasticsearch
 
-mkdir -p ${es_home_dir}/data ${es_home_dir}/logs ${es_home_dir}/config ${es_home_dir}/conf.d
+mkdir -p ${es_home_dir}/data ${es_home_dir}/logs ${es_home_dir}/config ${es_home_dir}/conf.d /opt/curator
 
 HOSTNAME = $(hostname)
 ## elasticsearch confd
@@ -106,7 +114,7 @@ discovery.ec2.host_type: private_ip
 cluster.routing.allocation.awareness.attributes: aws_availability_zone
 discovery.ec2.endpoint: ec2.eu-west-2.amazonaws.com" > ${es_home_dir}/conf.d/elasticsearch.yml.tmpl
 
-chown -R elasticsearch:elasticsearch ${es_home_dir} ${efs_mount_path}
+chown -R elasticsearch:elasticsearch ${es_home_dir} ${efs_mount_path} /opt/curator
 
 chmod -R 770 ${es_home_dir} ${efs_mount_path}
 

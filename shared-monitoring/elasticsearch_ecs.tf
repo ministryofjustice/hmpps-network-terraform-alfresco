@@ -161,7 +161,7 @@ data "template_file" "userdata_ecs" {
     common_name          = "${local.common_name}"
     es_cluster_name      = "${local.common_name}"
     ecs_cluster          = "${module.ecs_cluster.ecs_cluster_name}"
-    efs_dns_name         = "${module.efs_backups.dns_cname}"
+    efs_dns_name         = "${module.efs_backups.efs_dns_name}"
     efs_mount_path       = "${local.efs_mount_path}"
     es_home_dir          = "${local.es_home_dir}"
     es_master_nodes      = "${var.es_master_nodes}"

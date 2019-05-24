@@ -134,46 +134,21 @@ locals {
   ]
 
   efs_security_groups = [
-    "${data.terraform_remote_state.security-groups.sg_alfresco_efs_in}",
+    "${data.terraform_remote_state.security-groups.sg_mon_efs}",
   ]
 
   instance_security_groups = [
     "${data.terraform_remote_state.security-groups.sg_ssh_bastion_in_id}",
-    "${data.terraform_remote_state.security-groups.sg_alfresco_efs_in}",
+    "${data.terraform_remote_state.security-groups.sg_mon_efs}",
     "${data.terraform_remote_state.security-groups.sg_monitoring}",
+    "${data.terraform_remote_state.security-groups.sg_elasticsearch}",
   ]
 
   elasticsearch_security_groups = [
     "${data.terraform_remote_state.security-groups.sg_ssh_bastion_in_id}",
-    "${data.terraform_remote_state.security-groups.sg_alfresco_efs_in}",
+    "${data.terraform_remote_state.security-groups.sg_mon_efs}",
     "${data.terraform_remote_state.security-groups.sg_elasticsearch}",
   ]
 
-  sg_monitoring_client = "${data.terraform_remote_state.security-groups.sg_monitoring_client}"
-
   tags = "${data.terraform_remote_state.vpc.tags}"
 }
-
-# locals {
-#   allowed_cidr_block           = ["${data.terraform_remote_state.vpc.vpc_cidr_block}"]
-#   internal_domain              = "${data.terraform_remote_state.vpc.internal_domain}"
-#   external_domain              = "${data.terraform_remote_state.vpc.external_domain}"
-#   environment_identifier       = "${data.terraform_remote_state.vpc.environment_identifier}"
-#   short_environment_identifier = "${data.terraform_remote_state.vpc.short_environment_identifier}"
-#   region                       = "${var.region}"
-#   alfresco_app_name            = "${data.terraform_remote_state.vpc.alfresco_app_name}"
-#   environment                  = "${data.terraform_remote_state.vpc.environment}"
-#   instance_profile             = "${data.terraform_remote_state.iam.iam_instance_ecs_es_profile_name}"
-#   access_logs_bucket           = "${data.terraform_remote_state.vpc.common_s3_lb_logs_bucket}"
-#   ssh_deployer_key             = "${data.terraform_remote_state.vpc.common_ssh_deployer_key}"
-#   s3bucket_kms_id              = "${data.terraform_remote_state.s3bucket.s3bucket_kms_id}"
-#   s3bucket                     = "${data.terraform_remote_state.s3bucket.s3bucket}"
-#   app_hostnames                = "${data.terraform_remote_state.vpc.app_hostnames}"
-#   application                  = "elasticsearch"
-#   image_version                = "latest"
-#   config-bucket                = "${data.terraform_remote_state.vpc.common_s3-config-bucket}"
-#   public_subnet_ids            = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-#   ecs_service_role             = "${data.terraform_remote_state.iam.iam_service_ecs_es_role_arn}"
-#   ecs_instance_role            = "${data.terraform_remote_state.iam.iam_instance_ecs_es_role_arn}"
-# }
-

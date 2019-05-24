@@ -3,9 +3,11 @@
 #-------------------------------------------------------------
 
 locals {
-  sg_monitoring_elb  = "${data.terraform_remote_state.security-groups.sg_monitoring_elb}"
-  sg_monitoring_inst = "${data.terraform_remote_state.security-groups.sg_monitoring}"
-  sg_elasticsearch   = "${data.terraform_remote_state.security-groups.sg_elasticsearch}"
+  sg_monitoring_elb    = "${data.terraform_remote_state.security-groups.sg_monitoring_elb}"
+  sg_monitoring_inst   = "${data.terraform_remote_state.security-groups.sg_monitoring}"
+  sg_elasticsearch     = "${data.terraform_remote_state.security-groups.sg_elasticsearch}"
+  sg_monitoring_client = "${data.terraform_remote_state.security-groups.sg_monitoring_client}"
+  sg_mon_efs           = "${data.terraform_remote_state.security-groups.sg_mon_efs}"
 }
 
 # lb
@@ -337,4 +339,23 @@ resource "aws_security_group_rule" "sg_monitoring_logstash_alt_tcp_out" {
   type                     = "egress"
   security_group_id        = "${local.sg_monitoring_client}"
   description              = "${var.environment_identifier}-logstash"
+}
+
+# efs
+resource "aws_security_group_rule" "efs_self_in" {
+  from_port         = 0
+  protocol          = -1
+  security_group_id = "${local.sg_mon_efs}"
+  to_port           = 0
+  type              = "ingress"
+  self              = true
+}
+
+resource "aws_security_group_rule" "efs_self_out" {
+  from_port         = 0
+  protocol          = -1
+  security_group_id = "${local.sg_mon_efs}"
+  to_port           = 0
+  type              = "egress"
+  self              = true
 }
