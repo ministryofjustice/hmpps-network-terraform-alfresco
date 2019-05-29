@@ -37,6 +37,14 @@ resource "aws_security_group" "mon_efs" {
   tags = "${merge(data.terraform_remote_state.vpc.tags, map("Name", "${var.environment_identifier}-monitoring-efs"))}"
 }
 
+resource "aws_security_group" "mon_jenkins" {
+  name        = "${var.environment_identifier}-monitoring-jenkins"
+  description = "security group for ${var.environment_identifier}-jenkins"
+  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
+
+  tags = "${merge(data.terraform_remote_state.vpc.tags, map("Name", "${var.environment_identifier}-monitoring-jenkins"))}"
+}
+
 # outputs
 output "sg_monitoring" {
   value = "${aws_security_group.monitoring_sg.id}"
@@ -56,4 +64,8 @@ output "sg_elasticsearch" {
 
 output "sg_mon_efs" {
   value = "${aws_security_group.mon_efs.id}"
+}
+
+output "sg_mon_jenkins" {
+  value = "${aws_security_group.mon_jenkins.id}"
 }

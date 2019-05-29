@@ -8,6 +8,7 @@ locals {
   sg_elasticsearch     = "${data.terraform_remote_state.security-groups.sg_elasticsearch}"
   sg_monitoring_client = "${data.terraform_remote_state.security-groups.sg_monitoring_client}"
   sg_mon_efs           = "${data.terraform_remote_state.security-groups.sg_mon_efs}"
+  sg_mon_jenkins       = "${data.terraform_remote_state.security-groups.sg_mon_jenkins}"
 }
 
 # lb
@@ -358,4 +359,15 @@ resource "aws_security_group_rule" "efs_self_out" {
   to_port           = 0
   type              = "egress"
   self              = true
+}
+
+# jenkins slave acess 
+resource "aws_security_group_rule" "sg_monitoring_jenkins_slave_docker_tls" {
+  from_port         = "2376"
+  to_port           = "2376"
+  protocol          = "tcp"
+  cidr_blocks       = ["${local.eng_vpc_cidr}"]
+  type              = "ingress"
+  security_group_id = "${local.sg_mon_jenkins}"
+  description       = "${var.environment_identifier}-jenkins_slave_access"
 }

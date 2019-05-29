@@ -64,3 +64,14 @@ output "monitoring_server_bucket_name" {
 output "monitoring_server_bucket_arn" {
   value = "${module.s3_backups_bucket.s3_bucket_arn}"
 }
+
+# IAM
+
+output "iam_instance_profile" {
+  value = "${module.create-iam-instance-profile-es.iam_instance_name}"
+}
+
+# Security groups
+output "instance_security_groups" {
+  value = "${local.instance_security_groups}"
+}
