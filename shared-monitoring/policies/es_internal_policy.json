@@ -45,11 +45,12 @@
             "Action": [
                 "s3:GetObject",
                 "s3:ListBucket",
+                "s3:ListObject",
                 "S3:PutObject"
             ],
             "Resource": [
-                "arn:aws:s3:::${backups_bucket_arn}",
-                "arn:aws:s3:::${backups_bucket_arn}/*"
+                "${backups_bucket_arn}",
+                "${backups_bucket_arn}/*"
             ]
         },
         {
