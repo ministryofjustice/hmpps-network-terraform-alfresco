@@ -40,16 +40,29 @@
             ]
         },
         {
-            "Sid": "allowAccessToS3Buckets",
+            "Sid": "allowAccessToEsBucket",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:GetBucketLocation",
+                "s3:ListBucketMultipartUploads",
+                "s3:ListBucketVersions"
+            ],
+            "Resource": [
+                "${backups_bucket_arn}"
+            ]
+        },
+        {
+            "Sid": "allowAccessToEsBucketsub",
             "Effect": "Allow",
             "Action": [
                 "s3:GetObject",
-                "s3:ListBucket",
-                "s3:ListObject",
-                "S3:PutObject"
+                "s3:PutObject",
+                "s3:DeleteObject",
+                "s3:AbortMultipartUpload",
+                "s3:ListMultipartUploadParts"
             ],
             "Resource": [
-                "${backups_bucket_arn}",
                 "${backups_bucket_arn}/*"
             ]
         },
