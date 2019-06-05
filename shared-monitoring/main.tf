@@ -127,6 +127,8 @@ locals {
   ssh_deployer_key             = "${data.terraform_remote_state.vpc.ssh_deployer_key}"
   server_dns                   = "monitoring"
   eng_vpc_cidr                 = "${data.terraform_remote_state.vpc.eng_vpc_cidr}"
+  port                         = 9200
+  protocol                     = "HTTP"
 
   private_subnet_ids = [
     "${data.terraform_remote_state.vpc.vpc_private-subnet-az1}",

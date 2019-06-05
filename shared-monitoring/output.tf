@@ -75,3 +75,8 @@ output "iam_instance_profile" {
 output "instance_security_groups" {
   value = "${local.instance_security_groups}"
 }
+
+# LB
+output "elasticsearch_cluster_lb" {
+  value = "${aws_route53_record.dns_entry.fqdn}"
+}
