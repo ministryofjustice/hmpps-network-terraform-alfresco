@@ -80,3 +80,8 @@ output "instance_security_groups" {
 output "elasticsearch_cluster_lb" {
   value = "${aws_route53_record.dns_entry.fqdn}"
 }
+
+# KMS Key
+output "monitoring_kms_arn" {
+  value = "${module.kms_key.kms_arn}"
+}
