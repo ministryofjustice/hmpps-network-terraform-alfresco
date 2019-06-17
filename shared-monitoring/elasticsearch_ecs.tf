@@ -38,18 +38,57 @@ module "create_app_elb" {
   tags = "${local.tags}"
 }
 
+# elb
+module "create_app_alb" {
+  source          = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//loadbalancer//alb/create_lb"
+  lb_name         = "${local.common_name}"
+  subnet_ids      = ["${local.private_subnet_ids}"]
+  security_groups = ["${local.lb_security_groups}"]
+  internal        = true
+  s3_bucket_name  = "${module.s3_lb_logs_bucket.s3_bucket_name}"
+  tags            = "${local.tags}"
+}
+
+# target group
+module "create_alb_target_grp" {
+  source              = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//loadbalancer//alb/targetgroup"
+  appname             = "${local.common_name}"
+  target_port         = "${local.port}"
+  target_protocol     = "${local.protocol}"
+  vpc_id              = "${local.vpc_id}"
+  target_type         = "instance"
+  tags                = "${local.tags}"
+  check_interval      = "30"
+  check_path          = "/_cat/health"
+  check_port          = "${local.port}"
+  check_protocol      = "${local.protocol}"
+  timeout             = 5
+  healthy_threshold   = 3
+  unhealthy_threshold = 3
+  return_code         = "200-299"
+}
+
+# listener
+module "create_alb_listener" {
+  source           = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//loadbalancer//alb/create_listener"
+  lb_arn           = "${module.create_app_alb.lb_arn}"
+  lb_port          = "${local.port}"
+  lb_protocol      = "${local.protocol}"
+  target_group_arn = "${module.create_alb_target_grp.target_group_arn}"
+}
+
 ###############################################
 # Create route53 entry lb
 ###############################################
 
 resource "aws_route53_record" "dns_entry" {
   zone_id = "${local.private_zone_id}"
-  name    = "monitoring-ecs.${local.internal_domain}"
+  name    = "elasticsearch.${local.internal_domain}"
   type    = "A"
 
   alias {
-    name                   = "${module.create_app_elb.environment_elb_dns_name}"
-    zone_id                = "${module.create_app_elb.environment_elb_zone_id}"
+    name                   = "${module.create_app_alb.lb_dns_name}"
+    zone_id                = "${module.create_app_alb.lb_zone_id}"
     evaluate_target_health = false
   }
 }
@@ -128,7 +167,7 @@ resource "aws_ecs_task_definition" "environment" {
 ############################################
 
 module "app_service" {
-  source                          = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//ecs/ecs_service//withloadbalancer//elb"
+  source                          = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//ecs/ecs_service//withloadbalancer//alb"
   servicename                     = "${local.common_name}"
   clustername                     = "${module.ecs_cluster.ecs_cluster_id}"
   ecs_service_role                = "${module.create-iam-ecs-role-int.iamrole_arn}"
@@ -136,7 +175,7 @@ module "app_service" {
   task_definition_revision        = "${aws_ecs_task_definition.environment.revision}"
   current_task_definition_version = "${data.aws_ecs_task_definition.app_task_definition.revision}"
   service_desired_count           = "${local.service_desired_count}"
-  elb_name                        = "${module.create_app_elb.environment_elb_name}"
+  target_group_arn                = "${module.create_alb_target_grp.target_group_arn}"
   containername                   = "${local.application}"
   containerport                   = "${local.containerport}"
 }
@@ -199,39 +238,36 @@ locals {
 
 #AZ1
 module "auto_scale_az1" {
-  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//asg_classic_lb"
+  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//default"
   asg_name             = "${local.common_name}-az1"
   subnet_ids           = ["${local.private_subnet_ids[0]}"]
   asg_min              = 1
   asg_max              = 1
   asg_desired          = 1
   launch_configuration = "${module.launch_cfg.launch_name}"
-  load_balancers       = ["${module.create_app_elb.environment_elb_name}"]
   tags                 = "${local.ecs_tags}"
 }
 
 #AZ2
 module "auto_scale_az2" {
-  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//asg_classic_lb"
+  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//default"
   asg_name             = "${local.common_name}-az2"
   subnet_ids           = ["${local.private_subnet_ids[1]}"]
   asg_min              = 1
   asg_max              = 1
   asg_desired          = 1
   launch_configuration = "${module.launch_cfg.launch_name}"
-  load_balancers       = ["${module.create_app_elb.environment_elb_name}"]
   tags                 = "${local.ecs_tags}"
 }
 
 #AZ3
 module "auto_scale_az3" {
-  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//asg_classic_lb"
+  source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//default"
   asg_name             = "${local.common_name}-az3"
   subnet_ids           = ["${local.private_subnet_ids[2]}"]
   asg_min              = 1
   asg_max              = 1
   asg_desired          = 1
   launch_configuration = "${module.launch_cfg.launch_name}"
-  load_balancers       = ["${module.create_app_elb.environment_elb_name}"]
   tags                 = "${local.ecs_tags}"
 }

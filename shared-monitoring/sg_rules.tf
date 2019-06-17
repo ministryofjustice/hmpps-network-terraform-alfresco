@@ -8,6 +8,7 @@ locals {
   sg_elasticsearch     = "${data.terraform_remote_state.security-groups.sg_elasticsearch}"
   sg_monitoring_client = "${data.terraform_remote_state.security-groups.sg_monitoring_client}"
   sg_mon_efs           = "${data.terraform_remote_state.security-groups.sg_mon_efs}"
+  sg_mon_jenkins       = "${data.terraform_remote_state.security-groups.sg_mon_jenkins}"
 }
 
 # lb
@@ -16,6 +17,16 @@ resource "aws_security_group_rule" "sg_monitoring_elb_http_lb_in" {
   to_port                  = "9200"
   protocol                 = "tcp"
   source_security_group_id = "${local.sg_monitoring_client}"
+  type                     = "ingress"
+  security_group_id        = "${local.sg_monitoring_elb}"
+  description              = "${var.environment_identifier}-elasticsearch-http"
+}
+
+resource "aws_security_group_rule" "sg_es_http_in" {
+  from_port                = "9200"
+  to_port                  = "9200"
+  protocol                 = "tcp"
+  source_security_group_id = "${local.sg_elasticsearch}"
   type                     = "ingress"
   security_group_id        = "${local.sg_monitoring_elb}"
   description              = "${var.environment_identifier}-elasticsearch-http"
@@ -150,6 +161,16 @@ resource "aws_security_group_rule" "elasticsearch_https" {
   type              = "egress"
   cidr_blocks       = ["0.0.0.0/0"]
   count             = "${var.sg_create_outbound_web_rules}"
+}
+
+resource "aws_security_group_rule" "sg_es_inst_out" {
+  from_port                = "9200"
+  to_port                  = "9200"
+  protocol                 = "tcp"
+  source_security_group_id = "${local.sg_monitoring_elb}"
+  type                     = "egress"
+  security_group_id        = "${local.sg_elasticsearch}"
+  description              = "${var.environment_identifier}-elasticsearch-http"
 }
 
 # monitoring
@@ -358,4 +379,15 @@ resource "aws_security_group_rule" "efs_self_out" {
   to_port           = 0
   type              = "egress"
   self              = true
+}
+
+# jenkins slave acess 
+resource "aws_security_group_rule" "sg_monitoring_jenkins_slave_docker_tls" {
+  from_port         = "2376"
+  to_port           = "2376"
+  protocol          = "tcp"
+  cidr_blocks       = ["${local.eng_vpc_cidr}"]
+  type              = "ingress"
+  security_group_id = "${local.sg_mon_jenkins}"
+  description       = "${var.environment_identifier}-jenkins_slave_access"
 }

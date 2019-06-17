@@ -111,6 +111,7 @@ discovery.ec2.tag.es_cluster_discovery: ${es_cluster_name}
 discovery.ec2.availability_zones: eu-west-2c,eu-west-2b,eu-west-2a
 discovery.ec2.any_group: true
 discovery.ec2.host_type: private_ip
+cloud.node.auto_attributes: true
 cluster.routing.allocation.awareness.attributes: aws_availability_zone
 discovery.ec2.endpoint: ec2.eu-west-2.amazonaws.com" > ${es_home_dir}/conf.d/elasticsearch.yml.tmpl
 

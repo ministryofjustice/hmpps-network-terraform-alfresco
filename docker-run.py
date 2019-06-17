@@ -14,7 +14,7 @@ git_branch = args.branch
 work_dir = os.getcwd()
 
 # image
-image_id = 'hmpps/terraform-builder:latest'
+image_id = 'mojdigitalstudio/hmpps-terraform-builder:latest'
 
 # command prfix
 cmd = 'sh run.sh'
