@@ -32,7 +32,7 @@ module "s3alb_logs_policy" {
 ### S3 bucket for logs
 #--------------------------------------------
 module "s3_backups_bucket" {
-  source            = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=issue-166-add-external-domain-to-tls-modules//modules//s3bucket//s3bucket_kms_encryption"
+  source            = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//s3bucket//s3bucket_kms_encryption"
   s3_bucket_name    = "${local.common_name}-backups"
   kms_master_key_id = "${module.kms_key.kms_key_id}"
   tags              = "${local.tags}"
