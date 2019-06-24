@@ -47,7 +47,6 @@ cat << EOF > ~/bootstrap.yml
      - bootstrap
      - rsyslog
      - users
-   - name: Add a cron to run s3_sync periodically
   tasks:
     - name: Add a cron to run s3_sync periodically
       cron:
