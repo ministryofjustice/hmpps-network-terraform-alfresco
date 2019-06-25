@@ -129,6 +129,9 @@ locals {
   eng_vpc_cidr                 = "${data.terraform_remote_state.vpc.eng_vpc_cidr}"
   port                         = 9200
   protocol                     = "HTTP"
+  service_type                 = "logstash"
+  registry_url                 = "mojdigitalstudio"
+  docker_tag                   = "latest"
 
   private_subnet_ids = [
     "${data.terraform_remote_state.vpc.vpc_private-subnet-az1}",

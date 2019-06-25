@@ -77,22 +77,6 @@ module "create_alb_listener" {
   target_group_arn = "${module.create_alb_target_grp.target_group_arn}"
 }
 
-###############################################
-# Create route53 entry lb
-###############################################
-
-resource "aws_route53_record" "dns_entry" {
-  zone_id = "${local.private_zone_id}"
-  name    = "elasticsearch.${local.internal_domain}"
-  type    = "A"
-
-  alias {
-    name                   = "${module.create_app_alb.lb_dns_name}"
-    zone_id                = "${module.create_app_alb.lb_zone_id}"
-    evaluate_target_health = false
-  }
-}
-
 ############################################
 # CREATE ECS CLUSTER
 ############################################
@@ -204,6 +188,7 @@ data "template_file" "userdata_ecs" {
     efs_mount_path       = "${local.efs_mount_path}"
     es_home_dir          = "${local.es_home_dir}"
     es_master_nodes      = "${var.es_master_nodes}"
+    es_host_url          = "${aws_route53_record.internal_monitoring_dns.fqdn}:${local.port}"
   }
 }
 
@@ -265,6 +250,24 @@ module "auto_scale_az3" {
   source               = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//default"
   asg_name             = "${local.common_name}-az3"
   subnet_ids           = ["${local.private_subnet_ids[2]}"]
+  asg_min              = 1
+  asg_max              = 1
+  asg_desired          = 1
+  launch_configuration = "${module.launch_cfg.launch_name}"
+  tags                 = "${local.ecs_tags}"
+}
+
+# All AZ
+module "auto_scale_az" {
+  source   = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//autoscaling//group//default"
+  asg_name = "${local.common_name}-all-az"
+
+  subnet_ids = [
+    "${local.private_subnet_ids[0]}",
+    "${local.private_subnet_ids[1]}",
+    "${local.private_subnet_ids[2]}",
+  ]
+
   asg_min              = 1
   asg_max              = 1
   asg_desired          = 1
