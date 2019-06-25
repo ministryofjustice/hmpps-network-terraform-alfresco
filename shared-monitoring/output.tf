@@ -79,3 +79,12 @@ output "instance_security_groups" {
 output "monitoring_kms_arn" {
   value = "${module.kms_key.kms_arn}"
 }
+
+# logstash
+output "internal_logstash_host" {
+  value = "${aws_route53_record.internal_logstash_dns.fqdn}"
+}
+
+output "external_logstash_host" {
+  value = "${aws_route53_record.external_logstash_dns.fqdn}"
+}

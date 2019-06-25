@@ -24,3 +24,28 @@ resource "aws_route53_record" "external_monitoring_dns" {
     evaluate_target_health = false
   }
 }
+
+# logstash
+resource "aws_route53_record" "internal_logstash_dns" {
+  zone_id = "${local.private_zone_id}"
+  name    = "logstash.${local.internal_domain}"
+  type    = "A"
+
+  alias {
+    name                   = "${aws_elb.mon_lb.dns_name}"
+    zone_id                = "${aws_elb.mon_lb.zone_id}"
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "external_logstash_dns" {
+  zone_id = "${local.public_zone_id}"
+  name    = "logstash.${local.external_domain}"
+  type    = "A"
+
+  alias {
+    name                   = "${aws_elb.mon_lb.dns_name}"
+    zone_id                = "${aws_elb.mon_lb.zone_id}"
+    evaluate_target_health = false
+  }
+}
