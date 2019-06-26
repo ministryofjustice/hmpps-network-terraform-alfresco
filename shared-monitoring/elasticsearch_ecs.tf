@@ -2,49 +2,13 @@
 # CREATE LB FOR INGRESS NODE
 ############################################
 
-# elb
-module "create_app_elb" {
-  source          = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//loadbalancer//elb//create_elb_with_https"
-  name            = "${local.common_name}"
-  subnets         = ["${local.private_subnet_ids}"]
-  security_groups = ["${local.lb_security_groups}"]
-  internal        = true
-
-  cross_zone_load_balancing   = "${var.cross_zone_load_balancing}"
-  idle_timeout                = "${var.idle_timeout}"
-  connection_draining         = "${var.connection_draining}"
-  connection_draining_timeout = "${var.connection_draining_timeout}"
-  bucket                      = "${module.s3_lb_logs_bucket.s3_bucket_name}"
-  bucket_prefix               = "${local.common_name}"
-  interval                    = 60
-  ssl_certificate_id          = "${local.certificate_arn}"
-  instance_port               = 9200
-  instance_protocol           = "http"
-  lb_port                     = 9200
-  lb_port_https               = 443
-  lb_protocol                 = "http"
-  lb_protocol_https           = "https"
-
-  health_check = [
-    {
-      target              = "HTTP:9200/_cat/health"
-      interval            = 30
-      healthy_threshold   = 2
-      unhealthy_threshold = 2
-      timeout             = 5
-    },
-  ]
-
-  tags = "${local.tags}"
-}
-
-# elb
+# alb
 module "create_app_alb" {
   source          = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//loadbalancer//alb/create_lb"
   lb_name         = "${local.common_name}"
-  subnet_ids      = ["${local.private_subnet_ids}"]
+  subnet_ids      = ["${local.public_subnet_ids}"]
   security_groups = ["${local.lb_security_groups}"]
-  internal        = true
+  internal        = false
   s3_bucket_name  = "${module.s3_lb_logs_bucket.s3_bucket_name}"
   tags            = "${local.tags}"
 }

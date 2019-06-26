@@ -12,6 +12,52 @@ locals {
 }
 
 # lb
+resource "aws_security_group_rule" "elb_self_in" {
+  from_port         = 0
+  protocol          = -1
+  security_group_id = "${local.sg_monitoring_elb}"
+  to_port           = 0
+  type              = "ingress"
+  self              = true
+}
+
+resource "aws_security_group_rule" "elb_self_out" {
+  from_port         = 0
+  protocol          = -1
+  security_group_id = "${local.sg_monitoring_elb}"
+  to_port           = 0
+  type              = "egress"
+  self              = true
+}
+
+resource "aws_security_group_rule" "sg_monitoring_elb_kibana_https_in" {
+  from_port = "443"
+  to_port   = "443"
+  protocol  = "tcp"
+
+  cidr_blocks = [
+    "${var.user_access_cidr_blocks}",
+  ]
+
+  type              = "ingress"
+  security_group_id = "${local.sg_monitoring_elb}"
+  description       = "${var.environment_identifier}-elasticsearch-http"
+}
+
+resource "aws_security_group_rule" "sg_monitoring_elb_es_nat_in" {
+  from_port = "9200"
+  to_port   = "9200"
+  protocol  = "tcp"
+
+  cidr_blocks = [
+    "${local.natgateway_cidrs}",
+  ]
+
+  type              = "ingress"
+  security_group_id = "${local.sg_monitoring_elb}"
+  description       = "${var.environment_identifier}-elasticsearch-http"
+}
+
 resource "aws_security_group_rule" "sg_monitoring_elb_http_lb_in" {
   from_port                = "9200"
   to_port                  = "9200"
@@ -20,36 +66,6 @@ resource "aws_security_group_rule" "sg_monitoring_elb_http_lb_in" {
   type                     = "ingress"
   security_group_id        = "${local.sg_monitoring_elb}"
   description              = "${var.environment_identifier}-elasticsearch-http"
-}
-
-resource "aws_security_group_rule" "sg_es_http_in" {
-  from_port                = "9200"
-  to_port                  = "9200"
-  protocol                 = "tcp"
-  source_security_group_id = "${local.sg_elasticsearch}"
-  type                     = "ingress"
-  security_group_id        = "${local.sg_monitoring_elb}"
-  description              = "${var.environment_identifier}-elasticsearch-http"
-}
-
-resource "aws_security_group_rule" "sg_monitoring_elb_kibana_lb_in" {
-  from_port                = "5601"
-  to_port                  = "5601"
-  protocol                 = "tcp"
-  source_security_group_id = "${local.sg_monitoring_client}"
-  type                     = "ingress"
-  security_group_id        = "${local.sg_monitoring_elb}"
-  description              = "${var.environment_identifier}-elasticsearch-http"
-}
-
-resource "aws_security_group_rule" "sg_monitoring_elb_kibana_https_in" {
-  from_port         = "443"
-  to_port           = "443"
-  protocol          = "tcp"
-  cidr_blocks       = ["${local.cidr_block}"]
-  type              = "ingress"
-  security_group_id = "${local.sg_monitoring_elb}"
-  description       = "${var.environment_identifier}-elasticsearch-http"
 }
 
 resource "aws_security_group_rule" "sg_monitoring_http_lb_out" {
@@ -82,16 +98,6 @@ resource "aws_security_group_rule" "sg_monitoring_elb_logstash_alt_lb_in" {
   description              = "${var.environment_identifier}-elasticsearch-http"
 }
 
-resource "aws_security_group_rule" "sg_monitoring_logstash_out" {
-  security_group_id        = "${local.sg_monitoring_elb}"
-  type                     = "egress"
-  from_port                = "2514"
-  to_port                  = "2514"
-  protocol                 = "tcp"
-  source_security_group_id = "${local.sg_monitoring_inst}"
-  description              = "${var.environment_identifier}-es-http"
-}
-
 resource "aws_security_group_rule" "sg_monitoring_kibana_out" {
   security_group_id        = "${local.sg_monitoring_elb}"
   type                     = "egress"
@@ -122,17 +128,22 @@ resource "aws_security_group_rule" "sg_monitoring_logstash_logs_out" {
   description              = "${var.environment_identifier}-logstash-logs"
 }
 
-resource "aws_security_group_rule" "sg_monitoring_http_lb_out_inst" {
-  security_group_id        = "${local.sg_monitoring_elb}"
-  type                     = "egress"
-  from_port                = "9200"
-  to_port                  = "9200"
-  protocol                 = "tcp"
-  source_security_group_id = "${local.sg_monitoring_inst}"
-  description              = "${var.environment_identifier}-es-http"
+# es instances
+
+resource "aws_security_group_rule" "sg_es_inst_out" {
+  from_port = "9200"
+  to_port   = "9200"
+  protocol  = "tcp"
+
+  cidr_blocks = [
+    "0.0.0.0/0",
+  ]
+
+  type              = "egress"
+  security_group_id = "${local.sg_elasticsearch}"
+  description       = "${var.environment_identifier}-elasticsearch-http"
 }
 
-# es instance
 resource "aws_security_group_rule" "sg_monitoring_http_from_lb_in" {
   from_port                = "9200"
   to_port                  = "9200"
@@ -173,16 +184,6 @@ resource "aws_security_group_rule" "sg_monitoring_logstash_logs_from_lb_in" {
   description              = "${var.environment_identifier}-logstash_logs"
 }
 
-resource "aws_security_group_rule" "sg_monitoring_inst_in" {
-  from_port                = "9200"
-  to_port                  = "9200"
-  protocol                 = "tcp"
-  source_security_group_id = "${local.sg_monitoring_inst}"
-  type                     = "ingress"
-  security_group_id        = "${local.sg_elasticsearch}"
-  description              = "${var.environment_identifier}-elasticsearch-http"
-}
-
 resource "aws_security_group_rule" "sg_monitoring_inst_alt_in" {
   from_port                = "9300"
   to_port                  = "9300"
@@ -211,16 +212,6 @@ resource "aws_security_group_rule" "elasticsearch_https" {
   type              = "egress"
   cidr_blocks       = ["0.0.0.0/0"]
   count             = "${var.sg_create_outbound_web_rules}"
-}
-
-resource "aws_security_group_rule" "sg_es_inst_out" {
-  from_port                = "9200"
-  to_port                  = "9200"
-  protocol                 = "tcp"
-  source_security_group_id = "${local.sg_monitoring_elb}"
-  type                     = "egress"
-  security_group_id        = "${local.sg_elasticsearch}"
-  description              = "${var.environment_identifier}-elasticsearch-http"
 }
 
 resource "aws_security_group_rule" "elasticsearch_self_in" {
