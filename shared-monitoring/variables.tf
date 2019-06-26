@@ -27,7 +27,7 @@ variable "environment_name" {}
 # Elasticsearch
 
 variable "es_ecs_memory" {
-  default = "12000"
+  default = "9000"
 }
 
 variable "es_ecs_cpu_units" {
@@ -35,7 +35,7 @@ variable "es_ecs_cpu_units" {
 }
 
 variable "es_ecs_mem_limit" {
-  default = "11500"
+  default = "8500"
 }
 
 variable "es_image_url" {
@@ -43,7 +43,7 @@ variable "es_image_url" {
 }
 
 variable "es_service_desired_count" {
-  default = 3
+  default = 4
 }
 
 variable "es_ebs_volume_size" {

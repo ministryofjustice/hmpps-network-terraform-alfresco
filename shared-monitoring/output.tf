@@ -14,7 +14,6 @@ output "ecs_cluster_name" {
 output "loggroup_name" {
   value = {
     elasticsearch = "${module.create_loggroup.loggroup_name}"
-    monitoring    = "${module.mon_loggroup.loggroup_name}"
     kibana        = "${module.kibana_loggroup.loggroup_name}"
     logstash      = "${module.logstash_loggroup.loggroup_name}"
     redis         = "${module.redis_loggroup.loggroup_name}"
@@ -76,12 +75,16 @@ output "instance_security_groups" {
   value = "${local.instance_security_groups}"
 }
 
-# LB
-output "elasticsearch_cluster_lb" {
-  value = "${aws_route53_record.dns_entry.fqdn}"
-}
-
 # KMS Key
 output "monitoring_kms_arn" {
   value = "${module.kms_key.kms_arn}"
+}
+
+# logstash
+output "internal_logstash_host" {
+  value = "${aws_route53_record.internal_logstash_dns.fqdn}"
+}
+
+output "external_logstash_host" {
+  value = "${aws_route53_record.external_logstash_dns.fqdn}"
 }
