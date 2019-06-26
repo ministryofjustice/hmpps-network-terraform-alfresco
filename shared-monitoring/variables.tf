@@ -101,3 +101,8 @@ variable "es_master_nodes" {
 variable "sg_create_outbound_web_rules" {
   default = 1
 }
+
+variable "user_access_cidr_blocks" {
+  type    = "list"
+  default = []
+}

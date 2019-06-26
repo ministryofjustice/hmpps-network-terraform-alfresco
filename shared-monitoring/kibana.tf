@@ -25,11 +25,12 @@ module "kibana_target_grp" {
 
 # listener
 module "kibana_alb_listener" {
-  source           = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//loadbalancer//alb/create_listener"
+  source           = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//loadbalancer//alb/create_listener_with_https"
   lb_arn           = "${module.create_app_alb.lb_arn}"
-  lb_port          = "${local.kibana_port}"
-  lb_protocol      = "${local.kibana_protocol}"
+  lb_port          = 443
+  lb_protocol      = "HTTPS"
   target_group_arn = "${module.kibana_target_grp.target_group_arn}"
+  certificate_arn  = ["${local.certificate_arn}"]
 }
 
 ############################################

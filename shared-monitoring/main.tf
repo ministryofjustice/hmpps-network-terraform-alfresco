@@ -30,18 +30,18 @@ data "terraform_remote_state" "vpc" {
   }
 }
 
-# #-------------------------------------------------------------
-# ### Getting the efs details
-# #-------------------------------------------------------------
-# data "terraform_remote_state" "efs" {
-#   backend = "s3"
+#-------------------------------------------------------------
+### Getting the efs details
+#-------------------------------------------------------------
+data "terraform_remote_state" "natgateway" {
+  backend = "s3"
 
-#   config {
-#     bucket = "${var.remote_state_bucket_name}"
-#     key    = "alfresco/efs/terraform.tfstate"
-#     region = "${var.region}"
-#   }
-# }
+  config {
+    bucket = "${var.remote_state_bucket_name}"
+    key    = "natgateway/terraform.tfstate"
+    region = "${var.region}"
+  }
+}
 
 #-------------------------------------------------------------
 ### Getting the security groups details
@@ -133,10 +133,22 @@ locals {
   registry_url                 = "mojdigitalstudio"
   docker_tag                   = "latest"
 
+  natgateway_cidrs = [
+    "${data.terraform_remote_state.natgateway.natgateway_common-nat-public-ip-az1}/32",
+    "${data.terraform_remote_state.natgateway.natgateway_common-nat-public-ip-az2}/32",
+    "${data.terraform_remote_state.natgateway.natgateway_common-nat-public-ip-az3}/32",
+  ]
+
   private_subnet_ids = [
     "${data.terraform_remote_state.vpc.vpc_private-subnet-az1}",
     "${data.terraform_remote_state.vpc.vpc_private-subnet-az2}",
     "${data.terraform_remote_state.vpc.vpc_private-subnet-az3}",
+  ]
+
+  public_subnet_ids = [
+    "${data.terraform_remote_state.vpc.vpc_public-subnet-az1}",
+    "${data.terraform_remote_state.vpc.vpc_public-subnet-az2}",
+    "${data.terraform_remote_state.vpc.vpc_public-subnet-az3}",
   ]
 
   efs_security_groups = [
