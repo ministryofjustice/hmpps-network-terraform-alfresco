@@ -46,8 +46,8 @@ variable "es_service_desired_count" {
   default = 4
 }
 
-variable "es_ebs_volume_size" {
-  default = 200
+variable "es_block_device" {
+  default = "/dev/nvme1n1"
 }
 
 variable "es_instance_type" {
@@ -105,4 +105,12 @@ variable "sg_create_outbound_web_rules" {
 variable "user_access_cidr_blocks" {
   type    = "list"
   default = []
+}
+
+variable "elk_backups_config" {
+  type = "map"
+  default = {
+    transition_days = 7
+    expiration_days = 14
+  }
 }
