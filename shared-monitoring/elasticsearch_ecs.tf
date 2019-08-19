@@ -161,46 +161,7 @@ data "template_file" "userdata_ecs" {
 # CREATE LAUNCH CONFIG FOR EC2 RUNNING SERVICES
 ############################################
 
-module "launch_cfg_az1" {
-  source                      = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//launch_configuration//noblockdevice"
-  launch_configuration_name   = "${local.common_name}"
-  image_id                    = "${data.aws_ami.ecs_ami.id}"
-  instance_type               = "${var.es_instance_type}"
-  volume_size                 = "30"
-  instance_profile            = "${module.create-iam-instance-profile-es.iam_instance_name}"
-  key_name                    = "${local.ssh_deployer_key}"
-  associate_public_ip_address = false
-  security_groups             = ["${local.elasticsearch_security_groups}"]
-  user_data                   = "${data.template_file.userdata_ecs.rendered}"
-}
-
-module "launch_cfg_az2" {
-  source                      = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//launch_configuration//noblockdevice"
-  launch_configuration_name   = "${local.common_name}"
-  image_id                    = "${data.aws_ami.ecs_ami.id}"
-  instance_type               = "${var.es_instance_type}"
-  volume_size                 = "30"
-  instance_profile            = "${module.create-iam-instance-profile-es.iam_instance_name}"
-  key_name                    = "${local.ssh_deployer_key}"
-  associate_public_ip_address = false
-  security_groups             = ["${local.elasticsearch_security_groups}"]
-  user_data                   = "${data.template_file.userdata_ecs.rendered}"
-}
-
-module "launch_cfg_az3" {
-  source                      = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//launch_configuration//noblockdevice"
-  launch_configuration_name   = "${local.common_name}"
-  image_id                    = "${data.aws_ami.ecs_ami.id}"
-  instance_type               = "${var.es_instance_type}"
-  volume_size                 = "30"
-  instance_profile            = "${module.create-iam-instance-profile-es.iam_instance_name}"
-  key_name                    = "${local.ssh_deployer_key}"
-  associate_public_ip_address = false
-  security_groups             = ["${local.elasticsearch_security_groups}"]
-  user_data                   = "${data.template_file.userdata_ecs.rendered}"
-}
-
-module "launch_cfg_all" {
+module "launch_cfg" {
   source                      = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git?ref=master//modules//launch_configuration//noblockdevice"
   launch_configuration_name   = "${local.common_name}"
   image_id                    = "${data.aws_ami.ecs_ami.id}"
@@ -229,7 +190,7 @@ module "auto_scale_az1" {
   asg_min              = 1
   asg_max              = 1
   asg_desired          = 1
-  launch_configuration = "${module.launch_cfg_az1.launch_name}"
+  launch_configuration = "${module.launch_cfg.launch_name}"
   tags                 = "${local.ecs_tags}"
 }
 
@@ -241,7 +202,7 @@ module "auto_scale_az2" {
   asg_min              = 1
   asg_max              = 1
   asg_desired          = 1
-  launch_configuration = "${module.launch_cfg_az2.launch_name}"
+  launch_configuration = "${module.launch_cfg.launch_name}"
   tags                 = "${local.ecs_tags}"
 }
 
@@ -253,7 +214,7 @@ module "auto_scale_az3" {
   asg_min              = 1
   asg_max              = 1
   asg_desired          = 1
-  launch_configuration = "${module.launch_cfg_az3.launch_name}"
+  launch_configuration = "${module.launch_cfg.launch_name}"
   tags                 = "${local.ecs_tags}"
 }
 
@@ -272,6 +233,6 @@ module "auto_scale_az" {
   asg_min              = 1
   asg_max              = 1
   asg_desired          = 1
-  launch_configuration = "${module.launch_cfg_all.launch_name}"
+  launch_configuration = "${module.launch_cfg.launch_name}"
   tags                 = "${local.ecs_tags}"
 }
