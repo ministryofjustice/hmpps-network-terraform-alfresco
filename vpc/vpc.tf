@@ -4,6 +4,6 @@ module "vpc" {
   vpc_dns_hosts          = var.aws_nameserver
   cidr_block             = var.vpc_supernet
   route53_domain_private = var.route53_domain_private
-  tags                   = var.tags
+  tags                   = local.tags
 }
 

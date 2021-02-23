@@ -25,3 +25,6 @@ data "terraform_remote_state" "ora_db_op_security_groups" {
   }
 }
 
+locals {
+  tags = data.terraform_remote_state.vpc.outputs.tags
+}

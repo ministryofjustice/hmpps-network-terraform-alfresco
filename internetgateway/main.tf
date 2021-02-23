@@ -8,10 +8,14 @@ data "terraform_remote_state" "vpc" {
   }
 }
 
+locals {
+  tags = data.terraform_remote_state.vpc.outputs.tags
+}
+
 module "env_igw" {
   source       = "git::https://github.com/ministryofjustice/hmpps-terraform-modules.git//modules/internetgateway?ref=terraform-0.12"
   gateway_name = var.environment_name
   vpc_id       = data.terraform_remote_state.vpc.outputs.vpc_id
-  tags         = var.tags
+  tags         = local.tags
 }
 

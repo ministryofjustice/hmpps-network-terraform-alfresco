@@ -15,7 +15,7 @@ module "create_parameter_ssh_key_private" {
   description    = "${var.environment_identifier}-ssh-private-key"
   type           = "SecureString"
   value          = module.ssh_key.private_key_pem
-  tags           = var.tags
+  tags           = local.tags
 }
 
 module "create_parameter_ssh_key" {
@@ -24,6 +24,6 @@ module "create_parameter_ssh_key" {
   description    = "${var.environment_identifier}-ssh-public-key"
   type           = "String"
   value          = module.ssh_key.public_key_openssh
-  tags           = var.tags
+  tags           = local.tags
 }
 

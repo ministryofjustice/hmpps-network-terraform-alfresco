@@ -5,7 +5,7 @@ resource "aws_vpc_peering_connection" "peering-bastion-vpc" {
   peer_vpc_id   = data.terraform_remote_state.bastion_remote_vpc.outputs.vpc.id
   vpc_id        = data.terraform_remote_state.vpc.outputs.vpc_id
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}-to-bastion-vpc"
     },

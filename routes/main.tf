@@ -30,6 +30,7 @@ data "terraform_remote_state" "internetgateway" {
 
 #
 locals {
+  tags = data.terraform_remote_state.vpc.outputs.tags
   route_table_public_ids = [
     data.terraform_remote_state.vpc.outputs.vpc_public-routetable-az1,
     data.terraform_remote_state.vpc.outputs.vpc_public-routetable-az2,

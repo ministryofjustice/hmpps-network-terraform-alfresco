@@ -43,6 +43,21 @@ data "terraform_remote_state" "bastion_remote_vpc" {
   }
 }
 
+locals {
+  tags = merge(
+    var.tags,
+    {
+      "sub-project" = "alfresco"
+    },
+    {
+      "source-hash" = "ignored"
+    },
+    {
+      "source-code" = "https://github.com/ministryofjustice/hmpps-network-terraform-alfresco"
+    }
+  )
+}
+
 ## Lambda to snapshot volumes periodically
 
 module "create_snapshot_lambda" {

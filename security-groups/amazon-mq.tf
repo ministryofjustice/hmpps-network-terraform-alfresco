@@ -3,7 +3,7 @@ resource "aws_security_group" "amazonmq_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "amazonmq incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.spg_app_name}_amazonmq_in"
       "Type" = "API"

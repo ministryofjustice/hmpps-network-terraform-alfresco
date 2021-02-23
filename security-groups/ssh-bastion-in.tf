@@ -3,7 +3,7 @@ resource "aws_security_group" "ssh_bastion_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "SSH bastion in"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}-ssh-bastion-in"
       "Type" = "SSH"

@@ -7,7 +7,7 @@ module "public_subnet_az1" {
   subnet_name             = "${var.environment_name}-public-${var.availability_zone["az1"]}"
   vpc_id                  = module.vpc.vpc_id
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Type" = "public"
     },
@@ -22,7 +22,7 @@ module "public_subnet_az2" {
   subnet_name             = "${var.environment_name}-public-${var.availability_zone["az2"]}"
   vpc_id                  = module.vpc.vpc_id
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Type" = "public"
     },
@@ -37,7 +37,7 @@ module "public_subnet_az3" {
   subnet_name             = "${var.environment_name}-public-${var.availability_zone["az3"]}"
   vpc_id                  = module.vpc.vpc_id
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Type" = "public"
     },
@@ -53,7 +53,7 @@ module "private_subnet_az1" {
   subnet_name             = "${var.environment_name}-private-${var.availability_zone["az1"]}"
   vpc_id                  = module.vpc.vpc_id
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Type" = "private"
     },
@@ -68,7 +68,7 @@ module "private_subnet_az2" {
   subnet_name             = "${var.environment_name}-private-${var.availability_zone["az2"]}"
   vpc_id                  = module.vpc.vpc_id
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Type" = "private"
     },
@@ -83,7 +83,7 @@ module "private_subnet_az3" {
   subnet_name             = "${var.environment_name}-private-${var.availability_zone["az3"]}"
   vpc_id                  = module.vpc.vpc_id
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Type" = "private"
     },
@@ -99,7 +99,7 @@ module "db_subnet_az1" {
   subnet_name             = "${var.environment_name}-db-${var.availability_zone["az1"]}"
   vpc_id                  = module.vpc.vpc_id
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Type" = "db"
     },
@@ -114,7 +114,7 @@ module "db_subnet_az2" {
   subnet_name             = "${var.environment_name}-db-${var.availability_zone["az2"]}"
   vpc_id                  = module.vpc.vpc_id
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Type" = "db"
     },
@@ -129,7 +129,7 @@ module "db_subnet_az3" {
   subnet_name             = "${var.environment_name}-db-${var.availability_zone["az3"]}"
   vpc_id                  = module.vpc.vpc_id
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Type" = "db"
     },

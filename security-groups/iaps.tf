@@ -5,7 +5,7 @@ resource "aws_security_group" "iaps_external_lb_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "External LB incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.iaps_app_name}_external-lb_in_in"
       "Type" = "WEB"
@@ -23,7 +23,7 @@ resource "aws_security_group" "iaps_db_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "db incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.iaps_app_name}_db_in"
       "Type" = "DB"
@@ -41,7 +41,7 @@ resource "aws_security_group" "iaps_api_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "api incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.iaps_app_name}_api_in"
       "Type" = "API"
@@ -58,7 +58,7 @@ resource "aws_security_group" "iaps_api_out" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "api outgoing"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.iaps_app_name}_api_out"
       "Type" = "API"

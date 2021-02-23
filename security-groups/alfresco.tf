@@ -5,7 +5,7 @@ resource "aws_security_group" "alfresco_external_lb_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "External LB incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.alfresco_app_name}_external-lb_in_in"
       "Type" = "WEB"
@@ -23,7 +23,7 @@ resource "aws_security_group" "alfresco_nginx_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "Nginx incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.alfresco_app_name}_nginx_in"
       "Type" = "WEB"
@@ -41,7 +41,7 @@ resource "aws_security_group" "alfresco_db_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "db incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.alfresco_app_name}_db_in"
       "Type" = "DB"
@@ -70,7 +70,7 @@ resource "aws_security_group" "alfresco_internal_lb_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "internal LB incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.alfresco_app_name}_internal-lb_in_in"
       "Type" = "WEB"
@@ -87,7 +87,7 @@ resource "aws_security_group" "alfresco_api_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "api incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.alfresco_app_name}_api_in"
       "Type" = "API"
