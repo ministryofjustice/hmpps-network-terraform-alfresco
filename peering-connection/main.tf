@@ -31,3 +31,6 @@ data "terraform_remote_state" "bastion_remote_vpc" {
   }
 }
 
+locals {
+  tags = data.terraform_remote_state.vpc.outputs.tags
+}

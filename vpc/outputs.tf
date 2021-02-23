@@ -1,5 +1,5 @@
 output "tags" {
-  value = var.tags
+  value = local.tags
 }
 
 output "environment_name" {

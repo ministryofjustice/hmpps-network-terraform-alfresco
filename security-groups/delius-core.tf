@@ -4,7 +4,7 @@
 #   name        = "${local.environment_name}-delius-core-delius-db-in"
 #   vpc_id      = "${data.aws_vpc.vpc.id}"
 #   description = "Database in"
-#   tags        = "${merge(var.tags, map("Name", "${local.environment_name}_delius_core_delius_db_in", "Type", "DB"))}"
+#   tags        = "${merge(local.tags, map("Name", "${local.environment_name}_delius_core_delius_db_in", "Type", "DB"))}"
 #
 #   lifecycle {
 #     create_before_destroy = true
@@ -17,7 +17,7 @@ resource "aws_security_group" "weblogic_interface_lb_decoupled" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "Weblogic interface LB decoupled"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}-weblogic-interface-lb-decoupled"
       "Type" = "Private"
@@ -49,7 +49,7 @@ resource "aws_security_group" "management_server" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "Management instance SG"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}-management-server-sg"
       "Type" = "Private"

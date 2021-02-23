@@ -22,7 +22,7 @@ resource "aws_security_group" "spg_external_lb_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "External LB incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.spg_app_name}_external-lb_in_in"
       "Type" = "WEB"
@@ -40,7 +40,7 @@ resource "aws_security_group" "spg_nginx_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "Nginx incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.spg_app_name}_nginx_in"
       "Type" = "WEB"
@@ -58,7 +58,7 @@ resource "aws_security_group" "spg_db_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "db incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.spg_app_name}_db_in"
       "Type" = "DB"
@@ -77,7 +77,7 @@ resource "aws_security_group" "spg_internal_lb_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "internal LB incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.spg_app_name}_internal-lb_in_in"
       "Type" = "WEB"
@@ -94,7 +94,7 @@ resource "aws_security_group" "spg_api_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "api incoming"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.spg_app_name}_api_in"
       "Type" = "API"
@@ -111,7 +111,7 @@ resource "aws_security_group" "ssh_jenkins_in" {
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
   description = "ssh access from jenkins"
   tags = merge(
-    var.tags,
+    local.tags,
     {
       "Name" = "${var.environment_name}_${var.spg_app_name}_ssh_jenkins_in"
       "Type" = "API"
