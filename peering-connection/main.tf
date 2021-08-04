@@ -31,6 +31,17 @@ data "terraform_remote_state" "bastion_remote_vpc" {
   }
 }
 
+data "terraform_remote_state" "vpn_remote_vpc" {
+  backend = "s3"
+
+  config = {
+    bucket   = var.bastion_remote_state_bucket_name
+    key      = "vpn-vpc/terraform.tfstate"
+    region   = var.region
+    role_arn = var.bastion_role_arn
+  }
+}
+
 locals {
   tags = data.terraform_remote_state.vpc.outputs.tags
 }

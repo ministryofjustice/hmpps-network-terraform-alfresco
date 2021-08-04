@@ -95,7 +95,7 @@ case ${ACTION_TYPE} in
     ;;
   docker-plan)
     echo "Running docker plan action"
-    rm -rf .terraform *.plan
+    rm -rf *.plan
     terragrunt init
     exit_on_error $? !!
     terragrunt plan -detailed-exitcode --out ${ENVIRONMENT_NAME_ARG}.plan || export tf_exit_code="$?"
@@ -117,7 +117,7 @@ case ${ACTION_TYPE} in
     ;;
   docker-destroy)
     echo "Running docker destroy action"
-    rm -rf .terraform *.plan
+    rm -rf *.plan
     terragrunt init
     terragrunt destroy -force
     exit_on_error $? !!
@@ -147,14 +147,14 @@ case ${ACTION_TYPE} in
     ;;
   docker-output)
     echo "Running docker output action"
-    rm -rf .terraform *.plan
+    rm -rf *.plan
     terragrunt init
     terragrunt output
     exit_on_error $? !!
     ;;
   docker-json)
     echo "Running docker output action"
-    rm -rf .terraform *.plan
+    rm -rf *.plan
     terragrunt init
     terragrunt output -json > data.json
     exit_on_error $? !!
